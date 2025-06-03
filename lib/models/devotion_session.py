@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer,String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from . import Base
@@ -7,7 +7,8 @@ class DevotionSession(Base):
     __tablename__ = 'devotion_sessions'
 
     id = Column(Integer, primary_key=True)
-    date = Column(DateTime, default=datetime.utcnow)
+    title = Column(String)
+    date = Column(DateTime, default=datetime)
     scripture_read = Column(Text, nullable=False)
     reflection = Column(Text)
     user_id = Column(Integer, ForeignKey('users.id'))

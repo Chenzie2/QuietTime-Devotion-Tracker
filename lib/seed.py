@@ -6,6 +6,7 @@ session.query(FavoriteVerse).delete()
 session.query(DevotionSession).delete()
 session.query(Category).delete()
 session.query(User).delete()
+session.commit()  
 
 # Create users
 user1 = User(first_name="Grace", last_name="Wairimu", age=21, gender="Female", email="gracie@gmail.com")
@@ -22,8 +23,8 @@ cat4 = Category(name="Sermon")
 # Create devotion sessions
 session1 = DevotionSession(
     title="Morning Prayer",
-    notes="Felt the Presence of God in the room.",
-    duration_minutes=20,
+    scripture_read="Psalm 23",
+    reflection="Felt the Presence of God in the room.",
     date=datetime(2025, 6, 1),
     user=user1,
     category=cat1
@@ -31,42 +32,35 @@ session1 = DevotionSession(
 
 session2 = DevotionSession(
     title="Evening Worship",
-    notes="Listened to First Love Music.",
-    duration_minutes=30,
+    scripture_read="John 4:24",
+    reflection="Listened to First Love Music.",
     date=datetime(2025, 6, 2),
     user=user2,
     category=cat2
 )
 
-session3 = DevotionSession(
-    title="Quiet Time Scripture Reading",
-    notes="Studied the story of Joseph. God is faithful!",
-    duration_minutes=40,
-    date=datetime(2025, 6, 3),
-    user=user3,
-    category=cat3
-)
 
-# Favorite verses
 verse1 = FavoriteVerse(
-    verse="Philippians 4:13",
-    reflection="My strength comes ONLY from God and apart from Him I can do nothing.",
+    verse_text="I can do all things through Christ who strengthens me.",
+    book="Philippians",
+    chapter=4,
+    verse_number=13,
     user=user1
 )
 
 verse2 = FavoriteVerse(
-    verse="Psalm 23:1",
-    reflection="Jesus, the Good Shepherd leads me. If God is all I have, then I have all I need.",
+    verse_text="The Lord is my shepherd; I shall not want.",
+    book="Psalm",
+    chapter=23,
+    verse_number=1,
     user=user4
 )
 
-# Add and commit
-session.add_all([
-    user1, user2, user3, user4,
-    cat1, cat2, cat3, cat4,
-    session1, session2, session3,
-    verse1, verse2
-])
+
+# Add all objects to session
+session.add_all([user1, user2, user3, user4, cat1, cat2, cat3, cat4, session1, session2, verse1, verse2])
+
+# Commit to save 
 session.commit()
 
 print("Database seeded successfully.")
