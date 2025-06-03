@@ -13,8 +13,8 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
 
     # Relationships
-    devotions = relationship("DevotionSession", back_populates="user", cascade="all, delete-orphan")
-    favorite_verses = relationship("FavoriteVerse", back_populates="user", cascade="all, delete-orphan")
+    devotion_sessions = relationship("DevotionSession", back_populates="user")
+    favorite_verses = relationship("FavoriteVerse", back_populates="user")
 
     def __repr__(self):
         return (

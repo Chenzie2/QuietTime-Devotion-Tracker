@@ -1,8 +1,9 @@
-from models import session
-from models.user import User
-from models.category import Category
-from models.devotion_session import DevotionSession
-from models.favorite_verse import FavoriteVerse
+from lib.models import session
+from lib.models.user import User
+from lib.models.devotion_session import DevotionSession
+from lib.models.category import Category
+from lib.models.favorite_verse import FavoriteVerse
+
 
 def main_menu():
     while True:

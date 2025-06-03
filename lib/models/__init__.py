@@ -1,12 +1,19 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-engine = create_engine("sqlite:///devotion_tracker.db", echo=True)
+Base = declarative_base()
+engine = create_engine("sqlite:///quiettime_devotion_tracker.db", echo=True)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-Base = declarative_base()
+
+from .user import User
+from .devotion_session import DevotionSession
+from .favorite_verse import FavoriteVerse
+from .category import Category
+
+
 Base.metadata.create_all(engine)
 
-print("Database and tables created successfully.")
+
+__all__ = ["User", "DevotionSession", "FavoriteVerse", "Category"]

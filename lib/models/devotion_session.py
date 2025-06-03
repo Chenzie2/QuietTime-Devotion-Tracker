@@ -10,7 +10,6 @@ class DevotionSession(Base):
     date = Column(DateTime, default=datetime.utcnow)
     scripture_read = Column(Text, nullable=False)
     reflection = Column(Text)
-
     user_id = Column(Integer, ForeignKey('users.id'))
     category_id = Column(Integer, ForeignKey('categories.id'))
 
