@@ -13,6 +13,11 @@ A command-line application to help users track their daily devotion habits, favo
 It uses SQLAlchemy ORM with a normalized SQLite database and features a clean command-line interface.
 
 ---
+## Project Owner
+
+**Grace Zawadi**
+
+---
 
 ## Setup Instructions
 
@@ -106,7 +111,13 @@ QuietTime-Devotion-Tracker/
 └── README.md
 ```
 ---
-## Project Owner
 
-**Grace Zawadi**
+## Support/Contact
+For questions or feedback, please reach out via GitHub: @Chenzie2
 
+### License
+
+This project is licensed under the [MIT License] 
+You are free to use, modify, and distribute this project with proper attribution.
+
+&copy; 2025 Grace Zawadi
