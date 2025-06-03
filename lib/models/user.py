@@ -2,7 +2,6 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from . import Base
 
-
 class User(Base):
     __tablename__ = 'users'
 
@@ -17,8 +16,12 @@ class User(Base):
     devotion_sessions = relationship("DevotionSession", back_populates="user")
     favorite_verses = relationship("FavoriteVerse", back_populates="user")
 
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
     def __repr__(self):
         return (
-        f"<DevotionSession #{self.id}: {self.date.strftime('%Y-%m-%d')} | "
-        f"Scripture: {self.scripture_read[:30]}... | User ID: {self.user_id}, Category ID: {self.category_id}>"
-    )
+            f"<User #{self.id}: {self.full_name} | "
+            f"Email: {self.email} | Age: {self.age} | Gender: {self.gender}>"
+        )

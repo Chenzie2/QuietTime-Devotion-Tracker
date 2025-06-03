@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer,String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from . import Base
@@ -17,8 +17,8 @@ class DevotionSession(Base):
     user = relationship("User", back_populates="devotion_sessions")
     category = relationship("Category", back_populates="devotion_sessions")
 
-def __repr__(self):
-    return (
-        f"<DevotionSession #{self.id}: {self.date.strftime('%Y-%m-%d')} | "
-        f"Scripture: {self.scripture_read[:30]}... | User ID: {self.user_id}, Category ID: {self.category_id}>"
-    )
+    def __repr__(self):
+        return (
+            f"<DevotionSession #{self.id}: {self.date.strftime('%Y-%m-%d')} | "
+            f"Scripture: {self.scripture_read[:30]}... | User ID: {self.user_id}, Category ID: {self.category_id}>"
+        )

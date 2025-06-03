@@ -10,5 +10,5 @@ class Category(Base):
 
     devotion_sessions = relationship("DevotionSession", back_populates="category")
 
-def __repr__(self):
-    return f"<Category #{self.id}: {self.name}>"
+    def __repr__(self):
+        return f"<Category #{self.id}: {self.name}>"

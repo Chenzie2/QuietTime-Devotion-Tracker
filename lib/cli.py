@@ -1,9 +1,8 @@
-from lib.models import session
-from lib.models.user import User
-from lib.models.devotion_session import DevotionSession
-from lib.models.category import Category
-from lib.models.favorite_verse import FavoriteVerse
-
+from models import session
+from models.user import User
+from models.devotion_session import DevotionSession
+from models.category import Category
+from models.favorite_verse import FavoriteVerse
 
 def main_menu():
     while True:
@@ -13,24 +12,25 @@ def main_menu():
         print("3. Manage Devotion Sessions")
         print("4. Manage Favorite Verses")
         print("0. Exit")
-        choice = input("Select an option: ").strip()
 
-        if choice == "1":
-            user_menu()
-        elif choice == "2":
-            category_menu()
-        elif choice == "3":
-            devotion_session_menu()
-        elif choice == "4":
-            favorite_verse_menu()
-        elif choice == "0":
-            print("Goodbye!")
-            break
+        actions = {
+            "1": user_menu,
+            "2": category_menu,
+            "3": devotion_session_menu,
+            "4": favorite_verse_menu,
+            "0": exit_program
+        }
+        action = actions.get(input("Select an option: ").strip())
+        if action:
+            action()
         else:
             print("Invalid choice, please try again.")
 
-#  USER MENU & FUNCTIONS 
+def exit_program():
+    print("Goodbye!")
+    exit()
 
+# ----------------- USER MENU -----------------
 def user_menu():
     while True:
         print("\n-- User Menu --")
@@ -40,20 +40,21 @@ def user_menu():
         print("4. View User's Devotion Sessions")
         print("5. Find User by Email")
         print("0. Back to Main Menu")
-        choice = input("Select an option: ").strip()
 
-        if choice == "1":
-            create_user()
-        elif choice == "2":
-            delete_user()
-        elif choice == "3":
-            show_all_users()
-        elif choice == "4":
-            view_user_devotion_sessions()
-        elif choice == "5":
-            find_user_by_email()
-        elif choice == "0":
+        actions = {
+            "1": create_user,
+            "2": delete_user,
+            "3": show_all_users,
+            "4": view_user_devotion_sessions,
+            "5": find_user_by_email,
+            "0": lambda: None
+        }
+        choice = input("Select an option: ").strip()
+        if choice == "0":
             break
+        action = actions.get(choice)
+        if action:
+            action()
         else:
             print("Invalid choice, try again.")
 
@@ -63,37 +64,43 @@ def create_user():
     last_name = input("Last Name: ").strip()
     email = input("Email: ").strip()
     age_input = input("Age (optional): ").strip()
-    gender = input("Gender (optional): ").strip()
+
+    gender_options = ('Male', 'Female', 'Other', '')
+    gender = input("Gender (Male/Female/Other): ").strip().capitalize()
+    if gender not in gender_options:
+        print("Invalid gender option.")
+        return
 
     if not first_name or not last_name or not email:
         print("First name, last name, and email are required.")
         return
 
-    age = None
-    if age_input:
-        if age_input.isdigit():
-            age = int(age_input)
-        else:
-            print("Invalid age; must be a number.")
-            return
+    age = int(age_input) if age_input.isdigit() else None
 
-    existing_user = session.query(User).filter_by(email=email).first()
-    if existing_user:
+    if session.query(User).filter_by(email=email).first():
         print("User with that email already exists.")
         return
 
     new_user = User(first_name=first_name, last_name=last_name, email=email, age=age, gender=gender)
-    session.add(new_user)
-    session.commit()
-    print(f"User {first_name} {last_name} created successfully!")
+    try:
+        session.add(new_user)
+        session.commit()
+        print(f"User {new_user.full_name} created successfully!")
+    except Exception as e:
+        session.rollback()
+        print("Error creating user:", e)
 
 def delete_user():
     email = input("Enter the email of the user to delete: ").strip()
     user = session.query(User).filter_by(email=email).first()
     if user:
-        session.delete(user)
-        session.commit()
-        print(f"User {user.first_name} {user.last_name} deleted.")
+        try:
+            session.delete(user)
+            session.commit()
+            print(f"User {user.full_name} deleted.")
+        except Exception as e:
+            session.rollback()
+            print("Error deleting user:", e)
     else:
         print("User not found.")
 
@@ -102,20 +109,17 @@ def show_all_users():
     if not users:
         print("No users found.")
         return
-    print("\nAll Users:")
     for u in users:
-        print(f"ID: {u.id}, Name: {u.first_name} {u.last_name}, Email: {u.email}, Age: {u.age}, Gender: {u.gender}")
+        print(f"ID: {u.id}, Name: {u.full_name}, Email: {u.email}, Age: {u.age}, Gender: {u.gender}")
 
 def view_user_devotion_sessions():
     email = input("Enter the user's email: ").strip()
     user = session.query(User).filter_by(email=email).first()
     if user:
-        sessions = user.devotion_sessions
-        if not sessions:
-            print("No devotion sessions found for this user.")
+        if not user.devotion_sessions:
+            print("No devotion sessions for this user.")
             return
-        print(f"\nDevotion Sessions for {user.first_name} {user.last_name}:")
-        for s in sessions:
+        for s in user.devotion_sessions:
             print(f"ID: {s.id}, Date: {s.date}, Scripture: {s.scripture_read}, Reflection: {s.reflection}")
     else:
         print("User not found.")
@@ -124,45 +128,40 @@ def find_user_by_email():
     email = input("Enter email to search: ").strip()
     user = session.query(User).filter_by(email=email).first()
     if user:
-        print(f"User found: {user.first_name} {user.last_name}, Age: {user.age}, Gender: {user.gender}")
+        print(f"{user.full_name} - Age: {user.age}, Gender: {user.gender}")
     else:
         print("User not found.")
 
-# CATEGORY MENU & FUNCTIONS 
-
+# ----------------- CATEGORY MENU -----------------
 def category_menu():
     while True:
         print("\n-- Category Menu --")
         print("1. Create Category")
         print("2. Delete Category")
         print("3. Show All Categories")
-        print("4. View Devotion Sessions by Category")
-        print("5. Find Category by Name")
         print("0. Back to Main Menu")
-        choice = input("Select an option: ").strip()
 
-        if choice == "1":
-            create_category()
-        elif choice == "2":
-            delete_category()
-        elif choice == "3":
-            show_all_categories()
-        elif choice == "4":
-            view_devotion_sessions_by_category()
-        elif choice == "5":
-            find_category_by_name()
-        elif choice == "0":
+        actions = {
+            "1": create_category,
+            "2": delete_category,
+            "3": show_all_categories,
+            "0": lambda: None
+        }
+        choice = input("Select an option: ").strip()
+        if choice == "0":
             break
+        action = actions.get(choice)
+        if action:
+            action()
         else:
             print("Invalid choice, try again.")
 
 def create_category():
-    name = input("Category Name: ").strip()
+    name = input("Category name: ").strip()
     if not name:
         print("Category name cannot be empty.")
         return
-    existing = session.query(Category).filter_by(name=name).first()
-    if existing:
+    if session.query(Category).filter_by(name=name).first():
         print("Category already exists.")
         return
     category = Category(name=name)
@@ -183,87 +182,41 @@ def delete_category():
 def show_all_categories():
     categories = session.query(Category).all()
     if not categories:
-        print("No categories found.")
+        print("No categories available.")
         return
-    print("\nCategories:")
     for c in categories:
         print(f"ID: {c.id}, Name: {c.name}")
 
-def view_devotion_sessions_by_category():
-    name = input("Enter category name: ").strip()
-    category = session.query(Category).filter_by(name=name).first()
-    if category:
-        sessions = category.devotion_sessions
-        if not sessions:
-            print("No devotion sessions found in this category.")
-            return
-        print(f"\nDevotion Sessions in category '{name}':")
-        for s in sessions:
-            print(f"ID: {s.id}, Date: {s.date}, Scripture: {s.scripture_read}, Reflection: {s.reflection}")
-    else:
-        print("Category not found.")
-
-def find_category_by_name():
-    name = input("Enter category name to search: ").strip()
-    category = session.query(Category).filter_by(name=name).first()
-    if category:
-        print(f"Category found: ID {category.id}, Name: {category.name}")
-    else:
-        print("Category not found.")
-
-#  DEVOTION SESSION MENU & FUNCTIONS 
-
+# ----------------- DEVOTION SESSION MENU -----------------
 def devotion_session_menu():
     while True:
         print("\n-- Devotion Session Menu --")
         print("1. Create Devotion Session")
         print("2. Delete Devotion Session")
         print("3. Show All Devotion Sessions")
-        print("4. View Favorite Verses for a Devotion Session (N/A)")  # Not linked, so placeholder
-        print("5. Find Devotion Session by Date")
         print("0. Back to Main Menu")
-        choice = input("Select an option: ").strip()
 
-        if choice == "1":
-            create_devotion_session()
-        elif choice == "2":
-            delete_devotion_session()
-        elif choice == "3":
-            show_all_devotion_sessions()
-        elif choice == "4":
-            print("Not implemented: favorite verses are linked to users, not devotion sessions.")
-        elif choice == "5":
-            find_devotion_session_by_date()
-        elif choice == "0":
+        actions = {
+            "1": create_devotion_session,
+            "2": delete_devotion_session,
+            "3": show_all_devotion_sessions,
+            "0": lambda: None
+        }
+        choice = input("Select an option: ").strip()
+        if choice == "0":
             break
+        action = actions.get(choice)
+        if action:
+            action()
         else:
             print("Invalid choice, try again.")
 
 def create_devotion_session():
-    print("\n-- Create Devotion Session --")
-    email = input("User's Email: ").strip()
-    user = session.query(User).filter_by(email=email).first()
+    user_email = input("User email: ").strip()
+    user = session.query(User).filter_by(email=user_email).first()
     if not user:
         print("User not found.")
         return
-
-    date_input = input("Date (YYYY-MM-DD HH:MM:SS) or leave empty for now: ").strip()
-    from datetime import datetime
-    date = None
-    if date_input:
-        try:
-            date = datetime.strptime(date_input, "%Y-%m-%d %H:%M:%S")
-        except ValueError:
-            print("Invalid datetime format. Use YYYY-MM-DD HH:MM:SS")
-            return
-
-    scripture_read = input("Scripture Read: ").strip()
-    reflection = input("Reflection: ").strip()
-
-    print("Available Categories:")
-    categories = session.query(Category).all()
-    for c in categories:
-        print(f"- {c.name}")
 
     category_name = input("Category name: ").strip()
     category = session.query(Category).filter_by(name=category_name).first()
@@ -271,113 +224,75 @@ def create_devotion_session():
         print("Category not found.")
         return
 
-    new_session = DevotionSession(date=date, scripture_read=scripture_read, reflection=reflection,
-                                  user_id=user.id, category_id=category.id)
+    scripture = input("Scripture Read: ").strip()
+    reflection = input("Reflection: ").strip()
+
+    new_session = DevotionSession(user_id=user.id, category_id=category.id,
+                                  scripture_read=scripture, reflection=reflection)
     session.add(new_session)
     session.commit()
-    print("Devotion session created successfully!")
+    print("Devotion session added.")
 
 def delete_devotion_session():
-    session_id = input("Enter devotion session ID to delete: ").strip()
-    if not session_id.isdigit():
-        print("Invalid ID.")
-        return
-    ds = session.query(DevotionSession).filter_by(id=int(session_id)).first()
-    if ds:
-        session.delete(ds)
+    session_id = input("Enter Devotion Session ID to delete: ").strip()
+    session_obj = session.query(DevotionSession).filter_by(id=session_id).first()
+    if session_obj:
+        session.delete(session_obj)
         session.commit()
         print("Devotion session deleted.")
     else:
         print("Devotion session not found.")
 
 def show_all_devotion_sessions():
-    sessions = session.query(DevotionSession).all()
-    if not sessions:
+    sessions_list = session.query(DevotionSession).all()
+    if not sessions_list:
         print("No devotion sessions found.")
         return
-    print("\nAll Devotion Sessions:")
-    for s in sessions:
-        user = session.query(User).filter_by(id=s.user_id).first()
-        category = session.query(Category).filter_by(id=s.category_id).first()
-        print(f"ID: {s.id}, Date: {s.date}, User: {user.first_name} {user.last_name}, "
-              f"Category: {category.name}, Scripture: {s.scripture_read}, Reflection: {s.reflection}")
+    for s in sessions_list:
+        print(f"ID: {s.id}, User: {s.user.full_name}, Category: {s.category.name}, Scripture: {s.scripture_read}, Reflection: {s.reflection}")
 
-def find_devotion_session_by_date():
-    date_input = input("Enter date (YYYY-MM-DD): ").strip()
-    from datetime import datetime
-    try:
-        date = datetime.strptime(date_input, "%Y-%m-%d").date()
-    except ValueError:
-        print("Invalid date format.")
-        return
-    sessions = session.query(DevotionSession).filter(
-        DevotionSession.date.isnot(None),
-        DevotionSession.date.cast("date") == date
-    ).all()
-    if not sessions:
-        print("No devotion sessions found for that date.")
-        return
-    print(f"\nDevotion sessions on {date_input}:")
-    for s in sessions:
-        print(f"ID: {s.id}, Scripture: {s.scripture_read}, Reflection: {s.reflection}")
-
-# FAVORITE VERSE MENU & FUNCTIONS 
-
+# ----------------- FAVORITE VERSE MENU -----------------
 def favorite_verse_menu():
     while True:
         print("\n-- Favorite Verse Menu --")
         print("1. Add Favorite Verse")
-        print("2. Delete Favorite Verse")
+        print("2. Remove Favorite Verse")
         print("3. Show All Favorite Verses")
-        print("4. View User's Favorite Verses")
         print("0. Back to Main Menu")
-        choice = input("Select an option: ").strip()
 
-        if choice == "1":
-            add_favorite_verse()
-        elif choice == "2":
-            delete_favorite_verse()
-        elif choice == "3":
-            show_all_favorite_verses()
-        elif choice == "4":
-            view_user_favorite_verses()
-        elif choice == "0":
+        actions = {
+            "1": add_favorite_verse,
+            "2": remove_favorite_verse,
+            "3": show_all_favorite_verses,
+            "0": lambda: None
+        }
+        choice = input("Select an option: ").strip()
+        if choice == "0":
             break
+        action = actions.get(choice)
+        if action:
+            action()
         else:
             print("Invalid choice, try again.")
 
 def add_favorite_verse():
-    print("\n-- Add Favorite Verse --")
-    email = input("User's Email: ").strip()
-    user = session.query(User).filter_by(email=email).first()
+    user_email = input("User email: ").strip()
+    user = session.query(User).filter_by(email=user_email).first()
     if not user:
         print("User not found.")
         return
-
-    verse_text = input("Verse Text: ").strip()
-    book = input("Book: ").strip()
-    chapter_input = input("Chapter (number): ").strip()
-    verse_number_input = input("Verse Number: ").strip()
-
-    if not chapter_input.isdigit() or not verse_number_input.isdigit():
-        print("Chapter and verse number must be numbers.")
+    verse = input("Enter favorite verse: ").strip()
+    if not verse:
+        print("Verse cannot be empty.")
         return
-
-    chapter = int(chapter_input)
-    verse_number = int(verse_number_input)
-
-    fav = FavoriteVerse(verse_text=verse_text, book=book, chapter=chapter,
-                        verse_number=verse_number, user_id=user.id)
+    fav = FavoriteVerse(user_id=user.id, verse_text=verse)
     session.add(fav)
     session.commit()
     print("Favorite verse added.")
 
-def delete_favorite_verse():
-    verse_id = input("Enter favorite verse ID to delete: ").strip()
-    if not verse_id.isdigit():
-        print("Invalid ID.")
-        return
-    fv = session.query(FavoriteVerse).filter_by(id=int(verse_id)).first()
+def remove_favorite_verse():
+    verse_id = input("Enter Favorite Verse ID to delete: ").strip()
+    fv = session.query(FavoriteVerse).filter_by(id=verse_id).first()
     if fv:
         session.delete(fv)
         session.commit()
@@ -390,25 +305,8 @@ def show_all_favorite_verses():
     if not verses:
         print("No favorite verses found.")
         return
-    print("\nAll Favorite Verses:")
     for v in verses:
-        user = session.query(User).filter_by(id=v.user_id).first()
-        print(f"ID: {v.id}, Verse: {v.verse_text} ({v.book} {v.chapter}:{v.verse_number}), User: {user.first_name} {user.last_name}")
-
-def view_user_favorite_verses():
-    email = input("Enter user email: ").strip()
-    user = session.query(User).filter_by(email=email).first()
-    if not user:
-        print("User not found.")
-        return
-    verses = user.favorite_verses
-    if not verses:
-        print("No favorite verses found for this user.")
-        return
-    print(f"\nFavorite Verses for {user.first_name} {user.last_name}:")
-    for v in verses:
-        print(f"ID: {v.id}, Verse: {v.verse_text} ({v.book} {v.chapter}:{v.verse_number})")
-
+        print(f"ID: {v.id}, User: {v.user.full_name}, Verse: {v.verse_text}")
 
 
 if __name__ == "__main__":
