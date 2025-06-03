@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 sqlalchemy = "*"
+alembic = "==1.14.1"
 
 [dev-packages]
 

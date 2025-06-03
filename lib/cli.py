@@ -310,7 +310,7 @@ def find_devotion_session_by_date():
         print("Invalid date format.")
         return
     sessions = session.query(DevotionSession).filter(
-        DevotionSession.date != None,
+        DevotionSession.date.isnot(None),
         DevotionSession.date.cast("date") == date
     ).all()
     if not sessions:
