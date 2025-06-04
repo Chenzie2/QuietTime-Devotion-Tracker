@@ -8,7 +8,7 @@ class DevotionSession(Base):
 
     id = Column(Integer, primary_key=True)
     title = Column(String)
-    date = Column(DateTime, default=datetime)
+    date = Column(DateTime, default=datetime.utcnow) 
     scripture_read = Column(Text, nullable=False)
     reflection = Column(Text)
     user_id = Column(Integer, ForeignKey('users.id'))

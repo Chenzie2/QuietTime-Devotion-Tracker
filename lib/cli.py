@@ -314,8 +314,16 @@ def create_devotion_session():
     scripture = input("Scripture Read: ").strip()
     reflection = input("Reflection: ").strip()
 
-    new_session = DevotionSession(user_id=user.id, category_id=category.id,
-                                  scripture_read=scripture, reflection=reflection)
+    title = category.name
+
+    new_session = DevotionSession(
+        user_id=user.id,
+        category_id=category.id,
+        scripture_read=scripture,
+        reflection=reflection,
+        title=title  # <-- FIX: assign title here
+    )
+
     session.add(new_session)
     session.commit()
     print("\n--------------------------------------------------")
@@ -394,13 +402,39 @@ def add_favorite_verse():
     if not user:
         print("User not found.")
         return
-    verse = input("Enter favorite verse: ").strip()
-    if not verse:
-        print("Verse cannot be empty.")
+
+    verse_text = input("Enter favorite verse text: ").strip()
+    if not verse_text:
+        print("Verse text cannot be empty.")
         return
-    fav = FavoriteVerse(user_id=user.id, verse_text=verse)
+
+    book = input("Enter book name: ").strip()
+    if not book:
+        print("Book name cannot be empty.")
+        return
+
+    try:
+        chapter = int(input("Enter chapter number: ").strip())
+    except ValueError:
+        print("Chapter number must be an integer.")
+        return
+
+    try:
+        verse_number = int(input("Enter verse number: ").strip())
+    except ValueError:
+        print("Verse number must be an integer.")
+        return
+
+    fav = FavoriteVerse(
+        user_id=user.id,
+        verse_text=verse_text,
+        book=book,
+        chapter=chapter,
+        verse_number=verse_number
+    )
     session.add(fav)
     session.commit()
+
     print("\n--------------------------------------------------")
     print("Favorite verse added successfully.")
     print("May His Word continue to dwell richly in you.")
@@ -441,6 +475,21 @@ def show_all_favorite_verses():
     print("His Word is a lamp to your feet and a light to your path. – Psalm 119:105")
     print("--------------------------------------------------")
 
+def parse_verse(verse_text):
+    parts = verse_text.strip().split(' ', 1)
+    if len(parts) != 2:
+        return None, None, None
+    book = parts[0]
+    chapter_verse = parts[1]
+    if ':' not in chapter_verse:
+        return book, None, None
+    chapter_str, verse_str = chapter_verse.split(':', 1)
+    try:
+        chapter = int(chapter_str)
+        verse_number = int(verse_str)
+    except ValueError:
+        return book, None, None
+    return book, chapter, verse_number
 
 if __name__ == "__main__":
     main_menu()
