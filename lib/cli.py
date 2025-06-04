@@ -4,9 +4,14 @@ from models.devotion_session import DevotionSession
 from models.category import Category
 from models.favorite_verse import FavoriteVerse
 
+
+
 def main_menu():
     while True:
-        print("\n--- QuietTime Devotion Tracker ---")
+        print("\n===================================================")
+        print("    Welcome to your QuietTime Devotion Tracker ")
+        print("   Deepen your walk with God, one session at a time")
+        print("===================================================")
         print("1. Manage Users")
         print("2. Manage Categories")
         print("3. Manage Devotion Sessions")
@@ -27,13 +32,18 @@ def main_menu():
             print("Invalid choice, please try again.")
 
 def exit_program():
-    print("Goodbye!")
+    print("\n--------------------------------------------------")
+    print("Thank you for spending time with God today.")
+    print("“Draw near to God, and He will draw near to you.” – James 4:8")
+    print("Come back soon for another quiet time.")
+    print("--------------------------------------------------")
     exit()
+
 
 # ----------------- USER MENU -----------------
 def user_menu():
     while True:
-        print("\n-- User Menu --")
+        print("\n----------- USER MENU -----------")
         print("1. Create User")
         print("2. Delete User")
         print("3. Show All Users")
@@ -56,7 +66,7 @@ def user_menu():
         if action:
             action()
         else:
-            print("Invalid choice, try again.")
+            print("Invalid choice, please try again.")
 
 def create_user():
     print("\n-- Create a New User --")
@@ -85,10 +95,14 @@ def create_user():
     try:
         session.add(new_user)
         session.commit()
-        print(f"User {new_user.full_name} created successfully!")
+        print("\n--------------------------------------------------")
+        print(f"Success! User '{new_user.full_name}' was created.")
+        print("You're doing great—keep seeking Him daily.")
+        print("--------------------------------------------------")
     except Exception as e:
         session.rollback()
         print("Error creating user:", e)
+
 
 def delete_user():
     email = input("Enter the email of the user to delete: ").strip()
@@ -97,45 +111,98 @@ def delete_user():
         try:
             session.delete(user)
             session.commit()
-            print(f"User {user.full_name} deleted.")
+            print("\n--------------------------------------------------")
+            print(f"User '{user.full_name}' has been deleted.")
+            print("May we keep growing in grace daily.")
+            print("--------------------------------------------------")
         except Exception as e:
             session.rollback()
             print("Error deleting user:", e)
     else:
         print("User not found.")
 
+
 def show_all_users():
     users = session.query(User).all()
     if not users:
+        print("\n--------------------------------------------------")
         print("No users found.")
+        print("You can start by creating your first user.")
+        print("--------------------------------------------------")
         return
+
+    print("\n--------------------------------------------------")
+    print(" Registered Users:\n")
+
     for u in users:
-        print(f"ID: {u.id}, Name: {u.full_name}, Email: {u.email}, Age: {u.age}, Gender: {u.gender}")
+        print("--------------------------------------------------")
+        print(f"ID       : {u.id}")
+        print(f"Name     : {u.full_name}")
+        print(f"Email    : {u.email}")
+        print(f"Age      : {u.age if u.age else 'N/A'}")
+        print(f"Gender   : {u.gender if u.gender else 'N/A'}")
+    print("--------------------------------------------------")
+    print("Each user is precious and known by name.")
+    print("--------------------------------------------------")
+
 
 def view_user_devotion_sessions():
     email = input("Enter the user's email: ").strip()
     user = session.query(User).filter_by(email=email).first()
-    if user:
-        if not user.devotion_sessions:
-            print("No devotion sessions for this user.")
-            return
-        for s in user.devotion_sessions:
-            print(f"ID: {s.id}, Date: {s.date}, Scripture: {s.scripture_read}, Reflection: {s.reflection}")
-    else:
-        print("User not found.")
+
+    if not user:
+        print("\n--------------------------------------------------")
+        print("User not found. Make sure the email is correct.")
+        print("--------------------------------------------------")
+        return
+
+    if not user.devotion_sessions:
+        print("\n--------------------------------------------------")
+        print(f"No devotion sessions found for {user.full_name}.")
+        print("Encourage them to spend time in the Word today.")
+        print("--------------------------------------------------")
+        return
+
+    print("\n--------------------------------------------------")
+    print(f" Devotion Sessions for {user.full_name}:\n")
+
+    for s in user.devotion_sessions:
+        print("--------------------------------------------------")
+        print(f"Session ID   : {s.id}")
+        print(f"Date         : {s.date}")
+        print(f"Scripture    : {s.scripture_read}")
+        print(f"Reflection   : {s.reflection}")
+    print("--------------------------------------------------")
+print("He rewards those who earnestly seek Him. – Hebrews 11:6")
+print("--------------------------------------------------")
 
 def find_user_by_email():
     email = input("Enter email to search: ").strip()
     user = session.query(User).filter_by(email=email).first()
-    if user:
-        print(f"{user.full_name} - Age: {user.age}, Gender: {user.gender}")
-    else:
-        print("User not found.")
+
+    if not user:
+        print("\n--------------------------------------------------")
+        print("No user found with that email.")
+        print("Make sure it's typed correctly.")
+        print("--------------------------------------------------")
+        return
+
+    print("\n--------------------------------------------------")
+    print(" User Details:\n")
+    print("--------------------------------------------------")
+    print(f"Name     : {user.full_name}")
+    print(f"Email    : {user.email}")
+    print(f"Age      : {user.age if user.age else 'N/A'}")
+    print(f"Gender   : {user.gender if user.gender else 'N/A'}")
+    print("--------------------------------------------------")
+    print("You are fearfully and wonderfully made. – Psalm 139:14")
+    print("--------------------------------------------------")
+
 
 # ----------------- CATEGORY MENU -----------------
 def category_menu():
     while True:
-        print("\n-- Category Menu --")
+        print("\n----- Category Menu ------")
         print("1. Create Category")
         print("2. Delete Category")
         print("3. Show All Categories")
@@ -167,7 +234,11 @@ def create_category():
     category = Category(name=name)
     session.add(category)
     session.commit()
-    print(f"Category '{name}' created.")
+    print("\n--------------------------------------------------")
+    print(f"Category '{name}' created successfully.")
+    print("Let every word lead you closer to Him.")
+    print("--------------------------------------------------")
+
 
 def delete_category():
     name = input("Enter category name to delete: ").strip()
@@ -175,22 +246,38 @@ def delete_category():
     if category:
         session.delete(category)
         session.commit()
-        print(f"Category '{name}' deleted.")
+        print("\n--------------------------------------------------")
+        print(f"Category '{name}' has been deleted.")
+        print("Keep organizing your time with the Lord intentionally.")
+        print("--------------------------------------------------")
     else:
         print("Category not found.")
 
 def show_all_categories():
     categories = session.query(Category).all()
     if not categories:
+        print("\n--------------------------------------------------")
         print("No categories available.")
+        print("Consider creating categories like Prayer, Study, Worship.")
+        print("--------------------------------------------------")
         return
+
+    print("\n--------------------------------------------------")
+    print(" Available Devotion Categories:\n")
+
     for c in categories:
-        print(f"ID: {c.id}, Name: {c.name}")
+        print("--------------------------------------------------")
+        print(f"ID    : {c.id}")
+        print(f"Name  : {c.name}")
+    print("--------------------------------------------------")
+    print("Let everything be done for the glory of God. – 1 Cor 10:31")
+    print("--------------------------------------------------")
+
 
 # ----------------- DEVOTION SESSION MENU -----------------
 def devotion_session_menu():
     while True:
-        print("\n-- Devotion Session Menu --")
+        print("\n------ Devotion Session Menu ------")
         print("1. Create Devotion Session")
         print("2. Delete Devotion Session")
         print("3. Show All Devotion Sessions")
@@ -231,7 +318,11 @@ def create_devotion_session():
                                   scripture_read=scripture, reflection=reflection)
     session.add(new_session)
     session.commit()
-    print("Devotion session added.")
+    print("\n--------------------------------------------------")
+    print("Devotion session recorded successfully.")
+    print("Your quiet time matters. Keep going.")
+    print("--------------------------------------------------")
+
 
 def delete_devotion_session():
     session_id = input("Enter Devotion Session ID to delete: ").strip()
@@ -239,22 +330,44 @@ def delete_devotion_session():
     if session_obj:
         session.delete(session_obj)
         session.commit()
-        print("Devotion session deleted.")
+        print("\n--------------------------------------------------")
+        print("Devotion session deleted successfully.")
+        print("Thank you for being intentional with your walk.")
+        print("--------------------------------------------------")
     else:
         print("Devotion session not found.")
+
 
 def show_all_devotion_sessions():
     sessions_list = session.query(DevotionSession).all()
     if not sessions_list:
+        print("\n--------------------------------------------------")
         print("No devotion sessions found.")
+        print("Your journey with God is worth recording. Start now.")
+        print("--------------------------------------------------")
         return
+
+    print("\n--------------------------------------------------")
+    print(" Devotion Sessions Log:\n")
+
     for s in sessions_list:
-        print(f"ID: {s.id}, User: {s.user.full_name}, Category: {s.category.name}, Scripture: {s.scripture_read}, Reflection: {s.reflection}")
+        print("--------------------------------------------------")
+        print(f"Session ID   : {s.id}")
+        print(f"User         : {s.user.full_name}")
+        print(f"Category     : {s.category.name}")
+        print(f"Date         : {s.date.strftime('%Y-%m-%d')}")
+        print(f"Scripture    : {s.scripture_read}")
+        print(f"Reflection   : {s.reflection}")
+    print("--------------------------------------------------")
+    print("Your faithfulness is seen by the One who matters most.")
+    print("--------------------------------------------------")
+
+
 
 # ----------------- FAVORITE VERSE MENU -----------------
 def favorite_verse_menu():
     while True:
-        print("\n-- Favorite Verse Menu --")
+        print("\n------- Favorite Verse Menu --------")
         print("1. Add Favorite Verse")
         print("2. Remove Favorite Verse")
         print("3. Show All Favorite Verses")
@@ -288,7 +401,11 @@ def add_favorite_verse():
     fav = FavoriteVerse(user_id=user.id, verse_text=verse)
     session.add(fav)
     session.commit()
-    print("Favorite verse added.")
+    print("\n--------------------------------------------------")
+    print("Favorite verse added successfully.")
+    print("May His Word continue to dwell richly in you.")
+    print("--------------------------------------------------")
+
 
 def remove_favorite_verse():
     verse_id = input("Enter Favorite Verse ID to delete: ").strip()
@@ -296,17 +413,33 @@ def remove_favorite_verse():
     if fv:
         session.delete(fv)
         session.commit()
-        print("Favorite verse deleted.")
+        print("\n--------------------------------------------------")
+        print("Favorite verse deleted successfully.")
+        print("Continue treasuring His word in your heart.")
+        print("--------------------------------------------------")
     else:
         print("Favorite verse not found.")
 
 def show_all_favorite_verses():
     verses = session.query(FavoriteVerse).all()
     if not verses:
+        print("\n--------------------------------------------------")
         print("No favorite verses found.")
+        print("Start treasuring God’s Word in your heart.")
+        print("--------------------------------------------------")
         return
+
+    print("\n--------------------------------------------------")
+    print(" Favorite Bible Verses:\n")
+
     for v in verses:
-        print(f"ID: {v.id}, User: {v.user.full_name}, Verse: {v.verse_text}")
+        print("--------------------------------------------------")
+        print(f"ID      : {v.id}")
+        print(f"User    : {v.user.full_name}")
+        print(f"Verse   : {v.verse_text}")
+    print("--------------------------------------------------")
+    print("His Word is a lamp to your feet and a light to your path. – Psalm 119:105")
+    print("--------------------------------------------------")
 
 
 if __name__ == "__main__":
